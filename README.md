@@ -1,6 +1,6 @@
 # mnml-virt-docker
 
-A terminal browser for [Docker](https://www.docker.com/) — list containers, images, volumes, networks, and per-project compose services without leaving the keyboard. **First sibling in the `mnml-virt-*` family** (later siblings will cover kubernetes, podman, libvirt, vagrant, multipass).
+A terminal browser for [Docker](https://www.docker.com/) — list containers, images, volumes, networks, and per-project compose services without leaving the keyboard. **First sibling in the `mnml-virt-*` family** (planned siblings: `mnml-virt-k8s`, `mnml-virt-podman`, `mnml-virt-colima`).
 
 Shells out to the `docker` CLI for everything (same pattern the AWS family uses with `aws`). No SDK dep, no API tokens — Docker's socket IS the auth boundary.
 
@@ -134,7 +134,7 @@ mnml-virt-docker
 :host.launch mnml-virt-docker
 ```
 
-The blit channel is wired through in v0.1 but the pty hand-off for `l` / `e` happens outside the cell grid (those commands eat the controlling terminal in standalone mode; v0.2 will route them through mnml's pty pane plumbing).
+The blit channel isn't wired in v0.1 yet — `l` / `e` eat the controlling terminal in standalone mode for now. v0.2 will add the blit-host path *and* route the pty actions through mnml's pty pane plumbing so they live inside the cell grid.
 
 ## Wire it into mnml's left rail
 
@@ -144,7 +144,7 @@ Once published, this sibling will register as a default chip in mnml's rail unde
 
 - **Pull from a registry** — use `docker pull` in your terminal
 - **Build images** — use `docker build` in your terminal (running a build inside a TUI tab is a no-fit)
-- **Kubernetes** — that's the next `mnml-virt-*` sibling (`mnml-virt-kubernetes`)
+- **Kubernetes** — that's the next `mnml-virt-*` sibling (`mnml-virt-k8s`)
 - **buildx** — separate surface from `docker images`; held back
 - **Swarm services / stacks** — overlaps with kubernetes; deferred
 - **Multi-host docker contexts** — v0.1 watches the default context only
@@ -162,7 +162,7 @@ Removing a container does **not** remove its named volumes — those persist ind
 
 ## Status
 
-**v0.1** — five tab kinds (containers / images / volumes / networks / compose), per-tab inspect detail panel, ECR cross-sibling jump, stop / start / rm container, logs follow, exec shell, daemon-down recovery via `r`. Standalone only; blit-host mode is wired but pty handoff (logs / exec) needs v0.2 work in mnml.
+**v0.1** — five tab kinds (containers / images / volumes / networks / compose), per-tab inspect detail panel, ECR cross-sibling jump, stop / start / rm container, logs follow, exec shell, daemon-down recovery via `r`. Standalone only; blit-host mode is queued for v0.2.
 
 ## Source
 

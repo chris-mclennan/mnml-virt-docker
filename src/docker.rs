@@ -10,15 +10,22 @@ use anyhow::{Context, Result, anyhow};
 use serde::Deserialize;
 use std::process::{Command, Output};
 
-/// String returned in stderr by the docker CLI when the daemon socket
-/// isn't reachable. We sniff for this to surface a friendly top-level
-/// "daemon offline" state.
-pub const DAEMON_OFFLINE_MARKER: &str = "Cannot connect to the Docker daemon";
+/// Markers the docker CLI returns in stderr when the daemon socket
+/// isn't reachable. We sniff for any of these to surface a friendly
+/// top-level "daemon offline" state.
+///
+/// - Classic Docker Desktop (pre-2025): `Cannot connect to the Docker daemon`.
+/// - Modern docker CLI / colima / podman-docker shim:
+///   `failed to connect to the docker API at unix://...`.
+pub const DAEMON_OFFLINE_MARKERS: &[&str] = &[
+    "Cannot connect to the Docker daemon",
+    "failed to connect to the docker API",
+];
 
 /// Returns `true` when the given stderr text looks like the
 /// daemon-not-running error.
 pub fn is_daemon_offline(stderr: &str) -> bool {
-    stderr.contains(DAEMON_OFFLINE_MARKER)
+    DAEMON_OFFLINE_MARKERS.iter().any(|m| stderr.contains(m))
 }
 
 /// Friendly error from a failed `docker ...` invocation. Trims and
@@ -43,7 +50,7 @@ fn run_docker(args: &[&str]) -> Result<Vec<u8>> {
 
 /// Run a `docker` subcommand returning success/failure-with-stderr
 /// without the `docker:` prefix translation — used by the daemon
-/// probe so it can sniff for `DAEMON_OFFLINE_MARKER` raw.
+/// probe so it can sniff for `DAEMON_OFFLINE_MARKERS` raw.
 pub fn run_docker_raw(args: &[&str]) -> Result<(bool, String, String)> {
     let out: Output = Command::new("docker")
         .args(args)
@@ -497,8 +504,12 @@ mod tests {
 
     #[test]
     fn daemon_offline_marker_sniff() {
+        // Classic Docker Desktop wording.
         let s = "Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?";
         assert!(is_daemon_offline(s));
+        // Modern docker CLI wording (Docker 24+, colima, podman-docker shim).
+        let s2 = "failed to connect to the docker API at unix:///nonexistent.sock; check if the path is correct and if the daemon is running";
+        assert!(is_daemon_offline(s2));
         assert!(!is_daemon_offline("some unrelated docker error"));
     }
 }

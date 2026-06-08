@@ -26,8 +26,6 @@ chrono = { version = "0.4", features = ["serde"] }
 dirs = "5"
 webbrowser = "1"
 
-tmnl-protocol = { path = "../tmnl-protocol" }
-
 [dev-dependencies]
 tempfile = "3"
 
@@ -38,3 +36,4 @@ lto = true
 
 [profile.dist]
 inherits = "release"
+lto = "thin"
