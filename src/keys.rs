@@ -39,7 +39,12 @@ pub fn handle(key: KeyEvent, app: &App) -> Option<Action> {
 
     let m = key.modifiers;
     match key.code {
-        KeyCode::Char('q') | KeyCode::Esc => Some(Action::Quit),
+        // 2026-06-08 sibling-sweep fix: Esc no longer quits the TUI
+        // (footgun — every overlay uses Esc to cancel + the muscle
+        // memory escapes to the normal map and closes the app). Keep
+        // `q` and `Ctrl+C` for quit; Esc reserved for overlay-cancel
+        // (the rm-confirmation overlay above already uses it).
+        KeyCode::Char('q') => Some(Action::Quit),
         KeyCode::Char('c') if m.contains(KeyModifiers::CONTROL) => Some(Action::Quit),
         KeyCode::Up | KeyCode::Char('k') => Some(Action::Up),
         KeyCode::Down | KeyCode::Char('j') => Some(Action::Down),
