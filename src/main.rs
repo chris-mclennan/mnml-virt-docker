@@ -26,6 +26,7 @@ async fn main() -> Result<()> {
     let cfg = config::load()?;
 
     if cli.check {
+        println!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"));
         println!("config: {}", config::config_path().display());
         for (i, t) in cfg.tabs.iter().enumerate() {
             println!(
